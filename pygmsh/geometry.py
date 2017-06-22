@@ -313,6 +313,7 @@ class Geometry(object):
             rotation_axis=None,
             point_on_axis=None,
             angle=None,
+            layers=None
             ):
         '''Extrusion (translation + rotation) of any entity along a given
         translation_axis, around a given rotation_axis, about a given angle. If
@@ -332,11 +333,11 @@ class Geometry(object):
                 'Illegal extrude entity.'
             entity = Dummy('Line{{{}}}'.format(input_entity.id))
 
-        # out[] = Extrude{0,1,0}{ Line{1}; };
+        # out[] = Extrude{0,1,0}{ Line{1}; Layers {n}};
         name = 'ex{}'.format(self._EXTRUDE_ID)
         if translation_axis is not None and rotation_axis is not None:
             self._GMSH_CODE.append(
-                '{}[] = Extrude{{{{{}}}, {{{}}}, {{{}}}, {}}}{{{};}};'
+                '{}[] = Extrude{{{{{}}}, {{{}}}, {{{}}}, {}}}{{{};'
                 .format(
                     name,
                     ','.join(repr(x) for x in translation_axis),
@@ -349,7 +350,7 @@ class Geometry(object):
         elif translation_axis is not None:
             # Only translation
             self._GMSH_CODE.append(
-                '{}[] = Extrude{{{}}}{{{};}};'.format(
+                '{}[] = Extrude{{{}}}{{{};'.format(
                     name,
                     ','.join(repr(x) for x in translation_axis),
                     entity.id
@@ -359,13 +360,21 @@ class Geometry(object):
                 'Specify at least translation or rotation.'
             # Only rotation
             self._GMSH_CODE.append(
-                '{}[] = Extrude{{{{{}}}, {{{}}}, {}}}{{{};}};'.format(
+                '{}[] = Extrude{{{{{}}}, {{{}}}, {}}}{{{};'.format(
                     name,
                     ','.join(repr(x) for x in rotation_axis),
                     ','.join(repr(x) for x in point_on_axis),
                     angle,
                     entity.id
                 ))
+
+        if layers is None:
+            # just close parentheses
+            self._GMSH_CODE.append('};')
+        else:
+            # TODO: Recombine should be selectable by the user
+            self._GMSH_CODE.append('Layers{{{}}}; Recombine;}};'.format(layers))
+
 
         # From <http://www.manpagez.com/info/gmsh/gmsh-2.4.0/gmsh_66.php>:
         #
