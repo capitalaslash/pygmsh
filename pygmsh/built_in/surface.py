@@ -1,7 +1,7 @@
 from .line_loop import LineLoop
+from .surface_base import SurfaceBase
 
-
-class Surface(object):
+class Surface(SurfaceBase):
     """
     Generates a Surface or Rules Surfaces.
 
@@ -30,11 +30,9 @@ class Surface(object):
 
     def __init__(self, line_loop, api_level=2):
         assert isinstance(line_loop, LineLoop)
+        super(Surface, self).__init__(num_edges=len(line_loop))
 
         self.line_loop = line_loop
-
-        self.id = "rs{}".format(Surface._ID)
-        Surface._ID += 1
 
         # `Ruled Surface` was deprecated in Gmsh 3 in favor of `Surface`.
         name = "Surface" if api_level > 2 else "Ruled Surface"
