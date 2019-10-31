@@ -238,7 +238,9 @@ class Geometry(object):
         self._GMSH_CODE.append(code + ";")
         return
 
-    def set_transfinite_surface(self, surface, size=None, orientation=None):
+    def set_transfinite_surface(
+        self, surface, size=None, orientation=None, progression=None, bump=None
+    ):
         assert surface.num_edges == 4, "a transfinite surface can only have 4 sides"
         # size is not mandatory because in general a user can create it's own
         # transfinite lines and then just tell gmsh that the surface is
@@ -248,10 +250,16 @@ class Geometry(object):
                 surface, (PlaneSurface, Surface, self.Polygon)
             ), "we can create transfinite lines only if we have a line loop"
             self.set_transfinite_lines(
-                [surface.line_loop.lines[0], surface.line_loop.lines[2]], size[0]
+                [surface.line_loop.lines[0], -surface.line_loop.lines[2]],
+                size[0],
+                progression=progression,
+                bump=bump,
             )
             self.set_transfinite_lines(
-                [surface.line_loop.lines[1], surface.line_loop.lines[3]], size[1]
+                [surface.line_loop.lines[1], -surface.line_loop.lines[3]],
+                size[1],
+                progression=progression,
+                bump=bump,
             )
         code = "Transfinite Surface {{{}}}".format(surface.id)
         if orientation is not None:
