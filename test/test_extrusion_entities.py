@@ -51,3 +51,10 @@ def test():
         mesh = pygmsh.generate_mesh(geom)
         assert len(mesh.points) == 8 + 6
         assert len(poly_lat) == 3
+        return mesh
+
+
+if __name__ == "__main__":
+    import meshio
+
+    meshio.write("extrusion.vtu", test())
